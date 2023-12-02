@@ -5,11 +5,6 @@ import (
 	"strings"
 )
 
-// 12 red cubes, 13 green cubes, and 14 blue
-var redMax int = 12
-var greenMax int = 13
-var blueMax int = 14
-
 var maxColor = map[string]int{
 	"red":   12,
 	"green": 13,
