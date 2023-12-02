@@ -1,106 +1,50 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"strings"
 	"unicode"
 )
 
-func readLines(path string) ([]string, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
+var words []string = []string{
+	"one", "two", "three", "four", "five",
+	"six", "seven", "eight", "nine",
+}
 
-	var lines []string
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
+func replaceOnce(line string, start int, inc int) string {
+	if !unicode.IsDigit(rune(line[start])) {
+		replaced := false
+		for idx := start; idx < len(line) && idx >= 0; idx += inc {
+			for num, word := range words {
+				if strings.HasPrefix(line[idx:], word) {
+					suffix := strings.Replace(line[idx:], word, fmt.Sprint(num+1), 1)
+					line = line[:idx] + suffix
+					replaced = true
+					break
+				}
+			}
+			if replaced {
+				break
+			}
+		}
 	}
-	return lines, scanner.Err()
+	return line
 }
 
 func replaceWords(line string) string {
-	words := []string{
-		"one", "two", "three", "four", "five",
-		"six", "seven", "eight", "nine",
-	}
 
-	if !unicode.IsDigit(rune(line[0])) {
-		// replacing the first word
-		replaced := false
-		for idx := 0; idx < len(line); idx++ {
-			for num, word := range words {
-				// fmt.Println(line, word, idx)
-				if strings.HasPrefix(line[idx:], word) {
-					suffix := strings.Replace(line[idx:], word, fmt.Sprint(num+1), 1)
-					line = line[:idx] + suffix
-					replaced = true
-					break
-				}
-			}
-			if replaced {
-				break
-			}
-		}
-	}
-
-	if !unicode.IsDigit(rune(line[len(line)-1])) {
-		// replacing the last word
-		replaced := false
-
-		for idx := len(line) - 1; idx >= 0; idx-- {
-			for num, word := range words {
-				fmt.Println(line, word, idx, line[idx:])
-				if strings.HasPrefix(line[idx:], word) {
-					suffix := strings.Replace(line[idx:], word, fmt.Sprint(num+1), 1)
-					line = line[:idx] + suffix
-					replaced = true
-					break
-				}
-			}
-			if replaced {
-				break
-			}
-		}
-	}
+	line = replaceOnce(line, 0, 1)
+	line = replaceOnce(line, len(line)-1, -1)
 
 	return line
 }
 
-func main() {
-	lines, err := readLines("input.txt")
-
-	if err != nil {
-		fmt.Println("Unable to read the input file: ", err)
-	}
-
+func part2(lines []string) int {
 	var newLines []string
 
 	for _, line := range lines {
 		newLines = append(newLines, replaceWords(line))
 	}
 
-	var result int
-
-	fmt.Println(newLines)
-
-	for _, line := range newLines {
-		first := -1
-		var current int
-		for _, ch := range line {
-			if unicode.IsDigit(ch) {
-				if first == -1 {
-					first = int(ch - '0')
-				}
-				current = int(ch - '0')
-			}
-		}
-
-		result += first*10 + current
-	}
-	fmt.Println("Part 2: ", result)
+	return part1(newLines)
 }
